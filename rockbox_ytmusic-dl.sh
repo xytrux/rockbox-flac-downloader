@@ -41,13 +41,14 @@ fi
 
 outputTemplate="${outputFolder}/%(artist)s - %(title)s.%(ext)s"
 
-# Run yt-dlp
+# Run yt-dlp with SponsorBlock
 eval yt-dlp \
     --extract-audio \
     --audio-format "$audioFormat" \
     --audio-quality 0 \
     --embed-thumbnail \
     --add-metadata \
+    --sponsorblock-remove "sponsor,intro,outro,music_offtopic" \
     --sleep-interval 5 \
     --max-sleep-interval 5 \
     $cookiesArg \
@@ -96,3 +97,17 @@ find "$searchPath" -maxdepth 1 -type f -iname "*.flac" | while read -r flac; do
 done
 
 echo "All FLAC covers processed."
+
+# ----------- Playlist Creation Section -----------
+
+echo "Creating playlist..."
+
+playlistFile="$searchPath/playlist.m3u8"
+
+# Generate playlist with relative paths (sorted)
+(
+  cd "$searchPath" || exit
+  find . -maxdepth 1 -type f -iname "*.flac" | sort | sed 's|^\./||' > "$playlistFile"
+)
+
+echo "Playlist created at: $playlistFile"
